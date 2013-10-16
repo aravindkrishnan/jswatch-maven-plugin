@@ -1,0 +1,9 @@
+build
+target
+bin
+*.class
+.DS_Store
+.DS_Store?
+.project
+!.gitignore
+.settings
