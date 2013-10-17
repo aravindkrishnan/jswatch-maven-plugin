@@ -1,11 +1,8 @@
-package com.cg.gator.aggjs;
+package com.codegenesys.gator.aggjs;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -153,19 +150,14 @@ public class Aggregator
 			
 	}
 	
+	@SuppressWarnings("unused")
 	private static void printAllFiles(List<File> files) {
 		for(File file: files) {
 		  System.out.println(file.getAbsolutePath());
 	  }
 	}
 	
-	private static BufferedOutputStream createAppendableStream(File destination)
-	            throws FileNotFoundException 
-	{
-		    return new BufferedOutputStream(new FileOutputStream(destination, false));
-    }
-
-    @SuppressWarnings("resource")
+	@SuppressWarnings("resource")
 	private static void appendFile(OutputStream output, File source)
 	            throws IOException 
 	{
@@ -190,7 +182,7 @@ public class Aggregator
         OutputStream output = null;
         System.out.println("Creating "+ destination.getName());
         try {
-            output = createAppendableStream(destination);
+            output = Utils.createAppendableStream(destination);
             for (File source : sources) {
             	appendFile(output, source);
             }

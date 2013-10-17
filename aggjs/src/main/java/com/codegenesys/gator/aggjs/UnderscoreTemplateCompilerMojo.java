@@ -1,4 +1,4 @@
-package com.cg.gator.aggjs;
+package com.codegenesys.gator.aggjs;
 
 import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
@@ -45,16 +45,10 @@ public class UnderscoreTemplateCompilerMojo extends AbstractMojo
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		
-		if(this.templateFilesLocation == null || this.templateFilesLocation.isFile()) {
-    		return;
-    	}
+		if(Utils.isFile(this.templateFilesLocation))        { return; }	
+		if(!Utils.isFile(this.destinationTemplateFile))     { return; }	
+		if(Utils.stringNullOrEmpty(this.jsTemplatePackage)) { return; }
 		
-		if(this.destinationTemplateFile ==null || !this.destinationTemplateFile.isFile()) {
-    		return;
-    	}
-		if(this.jsTemplatePackage ==null || this.jsTemplatePackage.length() <= 0) {
-    		return;
-    	}
 		
 		new UnderscoreTemplates(this.destinationTemplateFile,
 				this.templateFilesLocation, this.jsTemplatePackage).compile();

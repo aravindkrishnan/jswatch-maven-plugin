@@ -1,4 +1,4 @@
-package com.cg.gator.aggjs;
+package com.codegenesys.gator.aggjs;
 
 import java.io.File;
 import java.io.IOException;

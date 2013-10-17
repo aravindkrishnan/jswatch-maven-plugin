@@ -1,4 +1,4 @@
-package com.cg.gator.aggjs;
+package com.codegenesys.gator.aggjs;
 
 import java.io.File;
 import org.apache.maven.plugin.AbstractMojo;
@@ -26,9 +26,7 @@ public class BeautifyMojo extends AbstractMojo
 	public void execute() throws MojoExecutionException, MojoFailureException
 	{
 		// destinationFile has to be a file(not a directory)
-    	if(this.destinationFile ==null || !this.destinationFile.isFile()) {
-    		return;
-    	}
+    	if(Utils.isFile(this.destinationFile)) { return; }
     	
     	new Beautifier(this.destinationFile).beautify();
 	}

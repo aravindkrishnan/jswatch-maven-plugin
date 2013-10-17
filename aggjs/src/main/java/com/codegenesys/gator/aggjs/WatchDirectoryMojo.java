@@ -1,4 +1,4 @@
-package com.cg.gator.aggjs;
+package com.codegenesys.gator.aggjs;
 
 import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_CREATE;
@@ -94,14 +94,8 @@ public class WatchDirectoryMojo extends AbstractMojo
     	System.out.println("\n Watching: "+ this.watchDirectory.getAbsolutePath() +"\n"); 
     	System.out.println("\n Waiting... \n");
     	
-    	if(!this.watchDirectory.exists() || !this.watchDirectory.isDirectory()) {
-    		return;
-    	}
-    	
-    	// destinationFile has to be a file(not a directory)
-    	if(this.destinationFile ==null || !this.destinationFile.isFile()) {
-    		return;
-    	}
+    	if(Utils.isDirectory(this.watchDirectory)) { return;  }
+    	if(Utils.isFile(this.destinationFile))     { return;  }
     	
         //define a folder root
         Path myDir = Paths.get(this.watchDirectory.getAbsolutePath());       
@@ -114,7 +108,7 @@ public class WatchDirectoryMojo extends AbstractMojo
 	           WatchKey watckKey = this.watcher.take();
 	
 	           List<WatchEvent<?>> events = watckKey.pollEvents();
-	           for (WatchEvent event : events) {
+	           for (WatchEvent<?> event : events) {
 	        	   
 	        	    WatchEvent<Path> ev = cast(event);
 	                Path name = ev.context();
@@ -175,6 +169,9 @@ public class WatchDirectoryMojo extends AbstractMojo
     	
        
     }
+    
+    
+    
     
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {

@@ -1,0 +1,1 @@
+jar -cvf bundle.jar aggjs-1.0.pom aggjs-1.0.jar aggjs-1.0.jar.asc aggjs-1.0-sources.jar aggjs-1.0-sources.jar.asc  aggjs-1.0-javadoc.jar  aggjs-1.0-javadoc.jar.asc
