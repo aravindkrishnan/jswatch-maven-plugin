@@ -44,6 +44,7 @@ public class WatchDirectoryMojo extends AbstractMojo
 		this.watcher =  FileSystems.getDefault().newWatchService();
 		this.keys = new HashMap<WatchKey,Path>();
 		this.jsIncludes = new File[0];
+		this.jsExcludes = new File[0];
 	}
 
 	private final WatchService watcher;
@@ -68,34 +69,42 @@ public class WatchDirectoryMojo extends AbstractMojo
     * @parameter alias="jsIncludes"
     */
     private File[] jsIncludes;
-
-    /**
-     * Location of the destination js file.
-     * @parameter expression="${destinationTemplateFile}"
-     */
-	private File destinationTemplateFile;
-	
-	 /**
-     * Location of the templates  file.
-     * @parameter expression="${templateFilesLocation}"
-     */
-	private File templateFilesLocation;
-	
-	 /**
-     * Package name for the JS Templates
-     * @parameter expression="${underscoreJsLocation}"
-     */
-	private String jsTemplatePackage;
-	
     
+    
+    /**
+     * 
+     * @parameter alias="jsExcludes"
+     */
+     private File[] jsExcludes;
+     
+     
+     /**
+      * Location of the destination js file.
+      * @parameter expression="${destinationTemplateFile}"
+      */
+ 	private File destinationTemplateFile;
+ 	
+ 	 /**
+      * Location of the templates  file.
+      * @parameter expression="${templateFilesLocation}"
+      */
+ 	private File templateFilesLocation;
+ 	
+ 	 /**
+      * Package name for the JS Templates
+      * @parameter expression="${underscoreJsLocation}"
+      */
+ 	private String jsTemplatePackage;
+
+   
     
     public void execute() throws MojoExecutionException
     {
     	System.out.println("\n Watching: "+ this.watchDirectory.getAbsolutePath() +"\n"); 
     	System.out.println("\n Waiting... \n");
     	
-    	if(Utils.isDirectory(this.watchDirectory)) { return;  }
-    	if(Utils.isFile(this.destinationFile))     { return;  }
+    	if(!Utils.isDirectory(this.watchDirectory)) { return;  }
+    	if(!Utils.isFile(this.destinationFile))     { return;  }
     	
         //define a folder root
         Path myDir = Paths.get(this.watchDirectory.getAbsolutePath());       
@@ -129,15 +138,13 @@ public class WatchDirectoryMojo extends AbstractMojo
 	                	this.onDelete(myDir);
 	                }
 	                else if (event.kind() == StandardWatchEventKinds.ENTRY_MODIFY) {
-	                	int isDestFile = name.toString().trim().lastIndexOf(this.destinationFile.getName());
 	                	// aggregate only if change is not in destination file.
-                    	if(isDestFile == -1) {
+                    	if(!isJsOrTemplatesFile(name)) {
                     		System.out.println("Modified " + name.toString());
 		                    
 		                    if(!Files.isDirectory(child, NOFOLLOW_LINKS)) {
-		                    	
-		                    	new UnderscoreTemplates(this.destinationTemplateFile,this.templateFilesLocation, this.jsTemplatePackage).compile();
-	                    		new Aggregator(myDir, this.destinationFile,this.jsIncludes).aggregate();
+		                      	new UnderscoreTemplates(this.destinationTemplateFile,this.templateFilesLocation, this.jsTemplatePackage).compile();
+		                        new Aggregator(myDir, this.destinationFile,this.jsIncludes).aggregate();
 	                    		System.out.println("\n Waiting... \n");
 		                    }
                     	}
@@ -192,17 +199,46 @@ public class WatchDirectoryMojo extends AbstractMojo
      */
     
     private void registerAll(final Path start) throws IOException {
-        // register directory and sub-directories
+    	// register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
                 throws IOException
             {
-            	register(dir);
+            	if(!isExcluded(dir))
+        			register(dir);
                 return FileVisitResult.CONTINUE;
             }
           
         });
+    }
+    
+    private boolean isJsOrTemplatesFile(Path name) {
+     	int isDestFile = name.toString().trim().lastIndexOf(this.destinationFile.getName());
+     	int isTemplFile =name.toString().trim().lastIndexOf(this.destinationTemplateFile.getName());
+     	
+     	return isDestFile >=0  || isTemplFile >= 0;
+    }
+    
+    
+    private boolean isExcluded(Path file) {
+    	for(File jsExclude: this.jsExcludes) {
+    		if(file.toFile().getAbsolutePath().equalsIgnoreCase(jsExclude.getAbsolutePath()))
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    private boolean isExcluded(File file) {
+    	for(File jsExclude: this.jsExcludes) {
+    		if(file.getAbsolutePath().equalsIgnoreCase(jsExclude.getAbsolutePath()))
+    		{
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     /**
